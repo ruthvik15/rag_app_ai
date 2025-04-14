@@ -1,0 +1,8 @@
+langchain
+langchain-core
+langchain-community
+langchain-groq
+langchain-huggingface
+langchain-astra
+PyPDF2
+python-dotenv

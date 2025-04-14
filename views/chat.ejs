@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chat with PDF</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #1f1f2e, #2e2e3a);
+      color: #f1f1f1;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 300px;
+      background: #12121a;
+      padding: 1rem;
+      overflow-y: auto;
+      border-right: 1px solid #333;
+    }
+
+    .sidebar h3 {
+      margin-top: 0;
+      font-size: 1.2rem;
+      color: #00c4ff;
+    }
+
+    .chat-entry {
+      background: #1e1e2e;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .chat-entry p {
+      margin: 0.3rem 0;
+      font-size: 0.9rem;
+    }
+
+    .chat-entry small {
+      display: block;
+      font-size: 0.75rem;
+      color: #aaa;
+      margin-top: 0.4rem;
+    }
+
+    .chat-entry button {
+      margin-top: 0.5rem;
+      background: #ff4d4d;
+      border: none;
+      padding: 0.4rem 0.7rem;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .chat-entry button:hover {
+      background: #ff1a1a;
+    }
+
+    .main-chat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 2rem;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .main-chat h2 {
+      text-align: center;
+      color: #00c4ff;
+      margin-bottom: 1.5rem;
+    }
+
+    .chat-window {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .chat-form {
+      display: flex;
+      padding-top: 1rem;
+      gap: 1rem;
+    }
+
+    .chat-form input[type="text"] {
+      flex: 1;
+      padding: 0.7rem;
+      border-radius: 0.5rem;
+      border: none;
+      font-size: 1rem;
+    }
+
+    .chat-form button {
+      padding: 0.7rem 1.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      background: #00c4ff;
+      color: #000;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .chat-form button:hover {
+      background: #00a4cc;
+    }
+
+    .typing-animation {
+      font-style: italic;
+      color: #ccc;
+      padding-left: 10px;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    @media (max-width: 768px) {
+      body { flex-direction: column; }
+      .sidebar {
+        width: 100%;
+        height: 200px;
+        border-right: none;
+        border-bottom: 1px solid #333;
+      }
+      .main-chat {
+        padding: 1rem;
+      }
+      .chat-form {
+        flex-direction: column;
+      }
+      .chat-form button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h3>Previous Chats</h3>
+    <% history.slice().reverse().forEach(chat => { %>
+      <div class="chat-entry" data-id="<%= chat._id %>">
+        <p><strong>You:</strong> <%= chat.question %></p>
+        <p><strong>Bot:</strong> <%= chat.answer %></p>
+        <small><%= new Date(chat.timestamp).toLocaleString() %></small>
+        <button class="delete-chat" data-id="<%= chat._id %>">🗑 Delete</button>
+      </div>
+    <% }) %>
+  </div>
+
+  <!-- Main Chat -->
+  <div class="main-chat">
+    <h2>Chat with PDF</h2>
+    <div class="chat-window" id="chat-output"></div>
+
+    <form id="chat-form" class="chat-form">
+      <input type="text" name="question" placeholder="Ask something..." required />
+      <input type="hidden" name="fileId" value="<%= fileId %>">
+      <button type="submit">Send</button>
+    </form>
+  </div>
+
+  <!-- JS -->
+  <script>
+    const chatDiv = document.getElementById('chat-output');
+
+    document.getElementById('chat-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const question = formData.get('question');
+      const fileId = formData.get('fileId');
+
+      // Append user question
+      const userEntry = document.createElement('div');
+      userEntry.classList.add('chat-entry');
+      const timeNow = new Date().toLocaleString();
+      userEntry.innerHTML = `
+        <p><strong>You:</strong> ${question}</p>
+        <small>${timeNow}</small>
+      `;
+      chatDiv.appendChild(userEntry);
+
+      // Typing animation
+      const botEntry = document.createElement('div');
+      botEntry.classList.add('chat-entry');
+      botEntry.innerHTML = `
+        <p><strong>Bot:</strong><span class="typing-animation"> ⏳ Thinking...</span></p>
+      `;
+      chatDiv.appendChild(botEntry);
+
+      e.target.reset();
+
+      // Fetch response
+      const response = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question, fileId })
+      });
+
+      const data = await response.json();
+
+      // Update bot response
+      botEntry.innerHTML = `
+        <p><strong>Bot:</strong> ${data.answer}</p>
+        <small>${new Date().toLocaleString()}</small>
+        <button class="delete-chat" data-id="${data.chatId}">🗑 Delete</button>
+      `;
+    });
+
+    document.addEventListener('click', async (e) => {
+      if (e.target.classList.contains('delete-chat')) {
+        const chatId = e.target.dataset.id;
+
+        const res = await fetch(`/chat/${chatId}`, {
+          method: 'DELETE'
+        });
+
+        const result = await res.json();
+        if (result.success) {
+          const entry = e.target.closest('.chat-entry');
+          entry.remove();
+        } else {
+          alert('❌ Failed to delete chat');
+        }
+      }
+    });
+  </script>
+</body>
+</html>

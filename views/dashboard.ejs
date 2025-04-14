@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Upload PDFs</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+      margin: 0;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 1.5rem;
+    }
+
+    form.upload-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      align-items: center;
+    }
+
+    input[type="file"] {
+      padding: 0.5rem;
+      border: 2px dashed #007bff;
+      border-radius: 0.5rem;
+      width: 100%;
+      max-width: 400px;
+      background: #f0f8ff;
+      cursor: pointer;
+    }
+
+    button {
+      padding: 0.7rem 1.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      background: #007bff;
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #0056c7;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #ccc;
+      margin: 2rem 0;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background: #f9f9f9;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      border-radius: 0.7rem;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .file-name {
+      flex: 1;
+      font-weight: 500;
+      color: #444;
+    }
+
+    .actions form {
+      display: inline-block;
+      margin-left: 0.5rem;
+    }
+
+    .actions button {
+      font-size: 0.9rem;
+      padding: 0.4rem 0.8rem;
+      background: #28a745;
+    }
+
+    .actions button.delete {
+      background: #dc3545;
+    }
+
+    #progressContainer {
+      display: none;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    #uploadProgress {
+      width: 100%;
+      height: 20px;
+      margin-top: 0.5rem;
+    }
+
+    @media (max-width: 600px) {
+      li {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+
+      .actions {
+        width: 100%;
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .actions form {
+        flex: 1;
+      }
+
+      .actions button {
+        width: 100%;
+      }
+    }
+    .spinner {
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #007bff;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  margin: auto;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.logout{
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+  </style>
+</head>
+<body>
+  <div class="logout">
+    <form action="/logout" method="POST">
+      <button type="submit">Logout</button>
+  </form>
+  </div>
+  <div class="container">
+    <h2>Upload PDF</h2>
+    
+    <form class="upload-form" id="uploadForm" enctype="multipart/form-data">
+      <input type="file" name="pdf" accept="application/pdf" multiple required />
+      <button type="submit">Upload</button>
+    </form>
+    <div id="uploadLoader" style="display: none; text-align: center; margin-top: 1rem;">
+      <div class="spinner"></div>
+      <p id="uploadStatus">Uploading and processing PDF...</p>
+    </div>
+   
+
+    <hr />
+
+    <h2>Your Uploaded PDFs</h2>
+    <ul>
+      <% if (files.length === 0) { %>
+        <li>No files uploaded yet.</li>
+      <% } else { %>
+        <% files.forEach(file => { %>
+          <li>
+            <span class="file-name"><%= file.originalname %></span>
+            <div class="actions">
+              <form action="/chatroom" method="GET">
+                <input type="hidden" name="fileId" value="<%= file._id %>">
+                <button type="submit">Chat 💬</button>
+              </form>
+
+              <form action="/delete" method="POST" onsubmit="return confirm('Delete this file and chat?')">
+                <input type="hidden" name="fileId" value="<%= file._id %>">
+                <button type="submit" class="delete">🗑️</button>
+              </form>
+            </div>
+          </li>
+        <% }) %>
+      <% } %>
+    </ul>
+  </div>
+
+  <script>
+    document.getElementById('uploadForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+  
+      const form = e.target;
+      const formData = new FormData(form);
+  
+      const loader = document.getElementById('uploadLoader');
+      const statusText = document.getElementById('uploadStatus');
+      loader.style.display = 'block';
+      statusText.textContent = 'Uploading and processing PDF...';
+  
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/upload');
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+          if (xhr.status === 200) {
+            try {
+              const response = JSON.parse(xhr.responseText);
+              statusText.textContent = '✅ Done! Redirecting...';
+              setTimeout(() => {
+                window.location.href = `/chatroom?fileId=${response.fileId}`;
+              }, 1000);
+            } catch (err) {
+              statusText.textContent = '❌ Something went wrong. Try again.';
+            }
+          } else {
+            statusText.textContent = '❌ Upload failed. Please try again.';
+          }
+        }
+      };
+      xhr.send(formData);
+    });
+  </script>
+  
+  
+  
+  
+
+</body>
+</html>
