@@ -4,7 +4,7 @@ const connectDB = require('./config/db');
 const File = require('./models/File');
 const Chat = require('./models/Chat');
 require('dotenv').config();
-
+const MONGO_URI = process.env.MONGO_URI;
 const authRoutes = require('./routes/auth');
 const uploadRoutes = require('./routes/upload');
 const deleteRoute = require('./routes/delete');
@@ -12,7 +12,7 @@ const chatRoute = require('./routes/chat');
 const chatWithPdf = require('./utils/chatWithPdf');
 
 const app = express();
-connectDB(); 
+connectDB(MONGO_URI); 
 
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
