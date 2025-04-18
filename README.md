@@ -46,7 +46,7 @@ This is a full-stack AI-powered application that allows users to upload PDFs, as
 
          MONGO_URI=your_mongo_uri
 
-📝 .gitignore (Recommended)
+6 .gitignore (Recommended)
 
           node_modules/
           .env
