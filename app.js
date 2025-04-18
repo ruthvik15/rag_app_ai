@@ -20,7 +20,6 @@ app.use(express.static('uploads'));
 app.use(express.json()); 
 
 
-// ✅ Apply session BEFORE anything else that uses req.session
 app.use(session({
   secret: 'supersecret',
   resave: false,
@@ -32,20 +31,19 @@ app.use(session({
   }
 }));
 
-// ✅ Middleware to protect routes
 function authMiddleware(req, res, next) {
   if (!req.session.userId) return res.redirect('/');
   next();
 }
 
-// ✅ Routes
+
 app.use(authRoutes);
 app.use(uploadRoutes);
 app.use(deleteRoute);
 app.use(chatRoute);
 
 
-// ✅ Views
+
 
 app.get('/', (req, res) => {
   const errorMessage = req.query.errorMessage || null;
@@ -71,8 +69,8 @@ app.get('/chatroom', authMiddleware, async (req, res) => {
   res.render('chat', { fileId, history });
 });
 app.post('/logout', (req, res) => {
-  res.clearCookie('token'); // Assuming the JWT is stored in cookies
-  res.redirect('/'); // Redirect to login page after logout
+  res.clearCookie('token'); 
+  res.redirect('/'); 
 });
 
 const PORT = process.env.PORT || 8000;
