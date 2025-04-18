@@ -18,7 +18,11 @@ This is a full-stack AI-powered application that allows users to upload PDFs, as
 
 
 
+
+
 🚀 Features
+
+
 
 
 📂 Upload PDFs and store embeddings.
