@@ -3,19 +3,31 @@
 This is a full-stack AI-powered application that allows users to upload PDFs, ask questions, and get answers based on the content using Retrieval-Augmented Generation (RAG). It includes:
 
 🧠 LLaMA3 LLM via Groq API
+
 🗃️ PDF Parsing and Chunking
+
 📦 Embeddings with Hugging Face
+
 🧠 Vector DB using AstraDB
+
 🧾 User Auth with MongoDB
+
 🌐 Frontend using EJS, Node.js, HTML/CSS
+
 ⚙️ Chat + File-specific Context Retrieval
 
 🚀 Features
+
 📂 Upload PDFs and store embeddings.
+
 💬 Ask context-aware questions from your uploaded PDFs.
+
 🔐 User authentication with MongoDB.
+
 📜 Chat history saved per user per PDF.
+
 📁 RAG system powered by Groq + LangChain + AstraDB.
+
 
 ⚙️ Installation Guide
 1. Clone the Repository
