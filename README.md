@@ -17,12 +17,10 @@ This is a full-stack AI-powered application that allows users to upload PDFs, as
 ⚙️ Chat + File-specific Context Retrieval
 
 
+---
 
-
-
+  
 🚀 Features
-
-
 
 
 📂 Upload PDFs and store embeddings.
@@ -35,6 +33,7 @@ This is a full-stack AI-powered application that allows users to upload PDFs, as
 
 📁 RAG system powered by Groq + LangChain + AstraDB.
 
+---
 
 ⚙️ Installation Guide
 1. Clone the Repository
