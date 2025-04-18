@@ -1,4 +1,5 @@
 📚 RAG-based PDF QA Web App
+
 This is a full-stack AI-powered application that allows users to upload PDFs, ask questions, and get answers based on the content using Retrieval-Augmented Generation (RAG). It includes:
 
 🧠 LLaMA3 LLM via Groq API
@@ -43,7 +44,7 @@ This is a full-stack AI-powered application that allows users to upload PDFs, as
         ASTRA_DB_API_ENDPOINT=your_api_endpoint
 5. Set Up .env File for Node.js
 
-      MONGO_URI=your_mongo_uri
+         MONGO_URI=your_mongo_uri
 
 📝 .gitignore (Recommended)
 
