@@ -1,32 +1,4 @@
 
-// const express = require('express');
-// const router = express.Router();
-// const { spawn } = require('child_process');
-
-// const path = require('path');
-// const { chatWithPDF } = require('../utils/chatWithPdf'); // 👈 Make sure this is the right path
-// const Chat = require('../models/Chat');
-// const File = require('../models/File');
-// router.post('/chat', async (req, res) => {
-//   const { question, fileId } = req.body;
-//   const userId = req.session.userId;
-
-//   try {
-//     const fileDoc = await File.findOne({ _id: fileId, userId });
-//     if (!fileDoc) return res.status(404).json({ error: 'File not found or unauthorized.' });
-
-//     const answer = await chatWithPDF(userId, fileId, question);
-
-//     await Chat.create({ userId, fileId, question, answer });
-
-//     res.json({ answer });
-//   } catch (err) {
-//     console.error('❌ Chat error:', err);
-//     res.status(500).json({ answer: 'Something went wrong while chatting with the PDF.' });
-//   }
-// });
-
-// module.exports = router;
 const express = require('express');
 const router = express.Router();
 const Chat = require('../models/Chat');
@@ -44,7 +16,6 @@ router.post('/chat', async (req, res) => {
 
     const answer = await chatWithPDF(userId, fileId, question);
 
-    // ✅ Save chat to DB and assign result to `savedChat`
     const chat = new Chat({
       userId,
       fileId,
@@ -53,9 +24,9 @@ router.post('/chat', async (req, res) => {
       timestamp: new Date()
     });
 
-    const savedChat = await chat.save(); // ✅ This line fixes your error
+    const savedChat = await chat.save(); 
 
-    // ✅ Send back both answer and ID so you can delete individual messages later
+ 
     res.json({ answer, chatId: savedChat._id });
 
   } catch (err) {
@@ -65,7 +36,7 @@ router.post('/chat', async (req, res) => {
 });
 
 
-// 🧹 Delete chat history for this file + user
+
 router.delete('/chat/delete', async (req, res) => {
   const { fileId } = req.body;
   const userId = req.session.userId;
